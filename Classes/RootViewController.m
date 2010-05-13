@@ -1,10 +1,11 @@
 //
 //  RootViewController.m
-//  iPhoneClient
+//  ImageiPhoneClient
 //
 //	HW7
 //
 //  portions Copyright 2010 Chris Parrish
+//  portions Copyright Beepscore LLC 2010. All rights reserved.
 
 #import "RootViewController.h"
 #import "ImageDetailController.h"

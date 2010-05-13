@@ -1,9 +1,10 @@
 //
-//  iPhoneClientAppDelegate.m
-//  iPhoneClient
+//  ImageiPhoneClientAppDelegate.m
+//  ImageiPhoneClient
 //	HW7
 //
 //  portions Copyright 2010 Chris Parrish
+//  portions Copyright Beepscore LLC 2010. All rights reserved.
 
 #import "ImageiPhoneClientAppDelegate.h"
 #import "RootViewController.h"

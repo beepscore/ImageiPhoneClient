@@ -4,6 +4,7 @@
 //
 //  Created by 23 on 5/2/10.
 //  portions Copyright 2010 RogueSheep. All rights reserved.
+//  portions Copyright Beepscore LLC 2010. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
