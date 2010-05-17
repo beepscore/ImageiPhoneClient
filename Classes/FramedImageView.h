@@ -12,17 +12,20 @@
 
 @interface FramedImageView : UIView
 {
-	UIImage*			image_;
+#pragma mark instance variables
 	// This is the image we draw a frame around
+	UIImage*			image_;
 	
-	CGFloat				width_;
 	// This is the stroke width of our frame around the image
-	CGFloat				radius_;
-	// This is the radius of our round corners
+	CGFloat				borderWidth_;
+
+	// This is the radius of our round corners	
+    CGFloat				cornerRadius_;
 }
 
+#pragma mark properties
 @property (nonatomic, retain)		UIImage*		image;
-@property (nonatomic)				CGFloat			width;
-@property (nonatomic)				CGFloat			radius;
+@property (nonatomic, assign)		CGFloat			borderWidth;
+@property (nonatomic, assign)		CGFloat			cornerRadius;
 
 @end

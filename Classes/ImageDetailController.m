@@ -42,8 +42,8 @@
 	imageView_.image		=	nil;
 	
 	// sync up the sliders and the view
-	imageView_.width		=	widthSlider_.value;
-	imageView_.radius		=	radiusSlider_.value;
+	imageView_.borderWidth		=	widthSlider_.value;
+	imageView_.cornerRadius		=	radiusSlider_.value;
 	
 	progressView_.alpha		= 0.0;
 	// hide the progress view until we need it
@@ -276,13 +276,13 @@
 - (IBAction) radiusChanged:(id)sender
 {
 	CGFloat value = radiusSlider_.value;
-	imageView_.radius = value;
+	imageView_.cornerRadius = value;
 }
 
 - (IBAction) widthChagned:(id)sender
 {
 	CGFloat value = widthSlider_.value;
-	imageView_.width = value;
+	imageView_.borderWidth = value;
 }
 
 @end
