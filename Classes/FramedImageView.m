@@ -183,8 +183,11 @@ void drawDropShadow(CGContextRef graphicsContext, CGRect rect, CGPathRef myPath,
 }
 
 
-void drawClippedImage(CGContextRef graphicsContext, CGRect rect, CGImageRef anImage, CGPathRef aPath) {
-    
+- (void) drawImageinContext:(CGContextRef) graphicsContext
+                       rect:(CGRect) rect
+                      image:(CGImageRef) anImage
+              clippedToPath:(CGPathRef) aPath
+{    
     CGContextSaveGState(graphicsContext);
     
     CGContextAddPath(graphicsContext, aPath);
@@ -219,7 +222,8 @@ void drawClippedImage(CGContextRef graphicsContext, CGRect rect, CGImageRef anIm
 }
 
 
-- (void) drawPlaceholderInContext:(CGContextRef) graphicsContext clippedToPath:(CGPathRef)aPath
+- (void) drawPlaceholderInContext:(CGContextRef) graphicsContext
+                    clippedToPath:(CGPathRef)aPath
 {
 	// if we don't have an image draw a simple little placeholder
 	
@@ -248,7 +252,10 @@ void drawClippedImage(CGContextRef graphicsContext, CGRect rect, CGImageRef anIm
 	// DRAW SOME TEXT INFORMING THE USER WHY THERE IS NO IMAGE
 	// THIS TEXT MUST HAVE A SHADOW DRAW BY THE
 	// CGCONTEXT SHADOW API
-    [placeholderString drawInRect:textRect withFont:textFont lineBreakMode:UILineBreakModeWordWrap alignment:UITextAlignmentCenter];
+    [placeholderString drawInRect:textRect
+                         withFont:textFont
+                    lineBreakMode:UILineBreakModeWordWrap
+                        alignment:UITextAlignmentCenter];
 }
 
 
@@ -276,17 +283,21 @@ void drawClippedImage(CGContextRef graphicsContext, CGRect rect, CGImageRef anIm
 	
 	if (nil == self.image)
 	{
-        [self drawPlaceholderInContext:graphicsContext clippedToPath:myPath];
+        [self drawPlaceholderInContext:graphicsContext
+                         clippedToPath:myPath];
         
 	} else
     {
-        
         drawDropShadow(graphicsContext, [self bounds], myPath, self.borderWidth);
         
-        //    drawClippedImage(graphicsContext, [self bounds], [self.myImage CGImage], myPath);
-        drawClippedImage(graphicsContext, [self bounds], [self.image CGImage], myPath);
+        [self drawImageinContext:graphicsContext
+                            rect:[self bounds]
+                           image:[self.image CGImage]
+                   clippedToPath:myPath];
         
-        [self drawBorderInContext:graphicsContext clippedToPath:myPath borderWidth:self.borderWidth];
+        [self drawBorderInContext:graphicsContext 
+                    clippedToPath:myPath 
+                      borderWidth:self.borderWidth];
         
         //		[image_ drawInRect:imageBounds];
     }
