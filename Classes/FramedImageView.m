@@ -201,14 +201,16 @@ void drawClippedImage(CGContextRef graphicsContext, CGRect rect, CGImageRef anIm
 }
 
 
-void drawBorder(CGContextRef graphicsContext, CGPathRef myPath, CGFloat aBorderWidth) {
-    
+- (void) drawBorderInContext:(CGContextRef) graphicsContext
+               clippedToPath:(CGPathRef)path
+                 borderWidth:(CGFloat) borderWidth
+{
     CGContextSaveGState(graphicsContext);
     
     CGContextBeginPath(graphicsContext);
-    CGContextAddPath(graphicsContext, myPath);
+    CGContextAddPath(graphicsContext, path);
     
-    CGContextSetLineWidth(graphicsContext, aBorderWidth);
+    CGContextSetLineWidth(graphicsContext, borderWidth);
     CGContextSetRGBStrokeColor(graphicsContext, 1.0, 1.0, 1.0, 1.0);
     
     CGContextDrawPath(graphicsContext, kCGPathStroke);
@@ -229,19 +231,19 @@ void drawBorder(CGContextRef graphicsContext, CGPathRef myPath, CGFloat aBorderW
 	// THAT THE IMAGE WOULD BE CLIPPED TO
 	
 	
-     CGContextSelectFont(graphicsContext, "Helvetica", 36.0, kCGEncodingMacRoman);
-     
-     NSString*	placeholderString = @"Waiting for image from Service";
-     
-     CGFloat		textFontSize = 28.0f; 
-     UIFont*		textFont = [UIFont fontWithName:@"Helvetica-Bold" size:textFontSize];
-     
-     CGFloat		textHInset		= 40.0f;
-     CGFloat		textVInset		= 55.0f;
-     
-     CGRect		textRect = self.bounds;
-     textRect = CGRectInset(textRect, textHInset * 2.0f, textVInset * 2.0f);
-
+    CGContextSelectFont(graphicsContext, "Helvetica", 36.0, kCGEncodingMacRoman);
+    
+    NSString*	placeholderString = @"Waiting for image from Service";
+    
+    CGFloat		textFontSize = 28.0f; 
+    UIFont*		textFont = [UIFont fontWithName:@"Helvetica-Bold" size:textFontSize];
+    
+    CGFloat		textHInset		= 40.0f;
+    CGFloat		textVInset		= 55.0f;
+    
+    CGRect		textRect = self.bounds;
+    textRect = CGRectInset(textRect, textHInset * 2.0f, textVInset * 2.0f);
+    
     
 	// DRAW SOME TEXT INFORMING THE USER WHY THERE IS NO IMAGE
 	// THIS TEXT MUST HAVE A SHADOW DRAW BY THE
@@ -275,7 +277,7 @@ void drawBorder(CGContextRef graphicsContext, CGPathRef myPath, CGFloat aBorderW
 	if (nil == self.image)
 	{
         [self drawPlaceholderInContext:graphicsContext clippedToPath:myPath];
-
+        
 	} else
     {
         
@@ -284,12 +286,9 @@ void drawBorder(CGContextRef graphicsContext, CGPathRef myPath, CGFloat aBorderW
         //    drawClippedImage(graphicsContext, [self bounds], [self.myImage CGImage], myPath);
         drawClippedImage(graphicsContext, [self bounds], [self.image CGImage], myPath);
         
-        drawBorder(graphicsContext, myPath, self.borderWidth);
+        [self drawBorderInContext:graphicsContext clippedToPath:myPath borderWidth:self.borderWidth];
         
-        
-        
-        
-//		[image_ drawInRect:imageBounds];
+        //		[image_ drawInRect:imageBounds];
     }
 	
 	// FOLLOW UP WITH ANY OTHER AFTER IMAGE DRAWING AS BEFORE
