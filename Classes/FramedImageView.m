@@ -157,8 +157,6 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 }
 
 
-
-
 // ref Lecture_7.pdf
 // ref http://developer.apple.com/iphone/library/documentation/GraphicsImaging/Conceptual/drawingwithquartz2d/Introduction/Introduction.html
 - (void) drawGradientInContext:(CGContextRef) graphicsContext
@@ -196,14 +194,6 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     
     CGContextRestoreGState(graphicsContext);
 }
-
-
-
-
-
-
-
-
 
 
 - (void) drawDropShadowInContext:(CGContextRef) graphicsContext
@@ -248,7 +238,11 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     // Here we get a CGImageRef from a Cocoa UIImage.
     // Alternatively, we could have gotten a CGImageRef from C.
     // http://developer.apple.com/iphone/library/documentation/Cocoa/Conceptual/LoadingResources/ImageSoundResources/ImageSoundResources.html
-    // Ref Gelphman Ch 8 p 187, Ch 9 p 206-207   
+    // Ref Gelphman Ch 8 p 187, Ch 9 p 206-207
+    // scale y axis by -1 to flip image upside down
+    CGContextScaleCTM(aGraphicsContext, 1.0f, -1.0f);
+    // translate image up
+    CGContextTranslateCTM(aGraphicsContext, 0.0f, -aRect.size.height);
     CGContextDrawImage(aGraphicsContext, aRect, anImage);
     
     // turn off clipping
@@ -278,19 +272,12 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
                     clippedToPath:(CGPathRef)aPath
 {
 	// if we don't have an image draw a simple little placeholder
-	
-	// HW_TODO :
-    
-	// THE PLACE HOLDER NEEDS TO DO THE FOLLOWING FOR CREDIT:
-	
-	// DRAW A GRADIENT OF SOME SORT, CLIPPED TO THE ROUND RECT PATH
-	// THAT THE IMAGE WOULD BE CLIPPED TO
+		
+	// draw gradient clipped to path
     [self drawGradientInContext:aGraphicsContext
                            rect:self.bounds
                            path:aPath];
-    
-    
-	
+
     CGContextSelectFont(aGraphicsContext, "Helvetica", 36.0, kCGEncodingMacRoman);
     
     NSString*	placeholderString = @"Waiting for image from Service";
@@ -320,14 +307,7 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 
 
 - (void)drawRect:(CGRect)rect
-{
-	// HW_TODO :
-    
-	// ADD YOUR DRAWING CODE FROM THE LAST ASSIGNMENT WITH 1 CHANGE :
-	
-	// IF WE DON'T HAVE AN IMAGE YET, DRAW THE PLACEHOLDER
-    // DO THIS BY CHOOSING TO DRAW THE PLACEHOLDER OR THE IMAGE
-    
+{    
     
     // get graphics context from Cocoa for use by Quartz CoreGraphics.    
     CGContextRef graphicsContext = UIGraphicsGetCurrentContext();
@@ -340,7 +320,8 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     // Alternatively could make myPath a class ivar and change it's value.    
     CGMutablePathRef myPath = roundedRectPathRef(clipRect, ovalWidth, ovalHeight);
     
-	
+
+	// if we don't have an image, draw placeholder
 	if (nil == self.image)
 	{
         [self drawPlaceholderInContext:graphicsContext
