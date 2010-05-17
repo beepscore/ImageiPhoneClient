@@ -9,9 +9,12 @@
 
 #import "FramedImageView.h"
 
+// declare anonymous category for "private" methods, avoid showing in .h file
+// Note in Objective C no method is private, it can be called from elsewhere.
+// Ref http://stackoverflow.com/questions/1052233/iphone-obj-c-anonymous-category-or-private-category
 @interface FramedImageView ()
 
-- (void) drawPlaceholder;
+- (void) drawPlaceholderInContext:(CGContextRef) graphicsContext clippedToPath:(CGPathRef)aPath;
 - (void) initialize;
 
 @end
@@ -214,10 +217,9 @@ void drawBorder(CGContextRef graphicsContext, CGPathRef myPath, CGFloat aBorderW
 }
 
 
-- (void) drawPlaceholder
+- (void) drawPlaceholderInContext:(CGContextRef) graphicsContext clippedToPath:(CGPathRef)aPath
 {
-	// if we don't have an image
-	// draw a simple little placeholder
+	// if we don't have an image draw a simple little placeholder
 	
 	// HW_TODO :
     
@@ -226,13 +228,8 @@ void drawBorder(CGContextRef graphicsContext, CGPathRef myPath, CGFloat aBorderW
 	// DRAW A GRADIENT OF SOME SORT, CLIPPED TO THE ROUND RECT PATH
 	// THAT THE IMAGE WOULD BE CLIPPED TO
 	
-	// DRAW SOME TEXT INFORMING THE USER WHY THERE IS NO IMAGE
-	// THIS TEXT MUST HAVE A SHADOW DRAW BY THE
-	// CGCONTEXT SHADOW API
 	
-	// HERE IS SOME CODE TO DRAW TEXT USING NSSTRING DRAWING FOR THE IPHONE OS:
-	/*
-     CGContextSelectFont(context, "Helvetica", 36.0, kCGEncodingMacRoman);
+     CGContextSelectFont(graphicsContext, "Helvetica", 36.0, kCGEncodingMacRoman);
      
      NSString*	placeholderString = @"Waiting for image from Service";
      
@@ -244,9 +241,12 @@ void drawBorder(CGContextRef graphicsContext, CGPathRef myPath, CGFloat aBorderW
      
      CGRect		textRect = self.bounds;
      textRect = CGRectInset(textRect, textHInset * 2.0f, textVInset * 2.0f);
-     
-     [placeholderString drawInRect:textRect withFont:textFont lineBreakMode:UILineBreakModeWordWrap alignment:UITextAlignmentCenter];
-     */
+
+    
+	// DRAW SOME TEXT INFORMING THE USER WHY THERE IS NO IMAGE
+	// THIS TEXT MUST HAVE A SHADOW DRAW BY THE
+	// CGCONTEXT SHADOW API
+    [placeholderString drawInRect:textRect withFont:textFont lineBreakMode:UILineBreakModeWordWrap alignment:UITextAlignmentCenter];
 }
 
 
@@ -274,7 +274,8 @@ void drawBorder(CGContextRef graphicsContext, CGPathRef myPath, CGFloat aBorderW
 	
 	if (nil == self.image)
 	{
-		[self drawPlaceholder];
+        [self drawPlaceholderInContext:graphicsContext clippedToPath:myPath];
+
 	} else
     {
         
