@@ -166,6 +166,9 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
                           path:(CGPathRef) myPath
 {
     
+    CGContextSaveGState(graphicsContext);
+    CGContextAddPath(graphicsContext, myPath);
+    CGContextClip(graphicsContext);
 
     CGGradientRef myGradient;    
     CGColorSpaceRef myColorspace;    
@@ -190,6 +193,8 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     
     CGColorSpaceRelease(myColorspace);
     CGGradientRelease(myGradient);
+    
+    CGContextRestoreGState(graphicsContext);
 }
 
 
