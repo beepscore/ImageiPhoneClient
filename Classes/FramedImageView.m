@@ -157,6 +157,50 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 }
 
 
+
+
+// ref Lecture_7.pdf
+// ref http://developer.apple.com/iphone/library/documentation/GraphicsImaging/Conceptual/drawingwithquartz2d/Introduction/Introduction.html
+- (void) drawGradientInContext:(CGContextRef) graphicsContext
+                          rect:(CGRect) rect
+                          path:(CGPathRef) myPath
+{
+    
+
+    CGGradientRef myGradient;    
+    CGColorSpaceRef myColorspace;    
+    size_t num_locations = 2;    
+    CGFloat locations[2] = { 0.0, 1.0 };    
+    CGFloat components[8] = { 1.0, 0.5, 0.4, 1.0,  // Start color
+        0.8, 0.8, 0.3, 1.0 }; // End color
+    
+    // ref http://stackoverflow.com/questions/560254/kcgcolorspacegenericrgb-is-deprecated-on-iphone
+    myColorspace = CGColorSpaceCreateDeviceRGB();
+    myGradient = CGGradientCreateWithColorComponents (myColorspace, components,
+                                                      locations, num_locations);
+    
+    
+    CGPoint start = CGPointMake(rect.origin.x, rect.origin.y + rect.size.height * 0.25);
+    CGPoint end = CGPointMake(rect.origin.x, rect.origin.y + rect.size.height * 0.75);
+    CGGradientDrawingOptions options = 0;
+    options |= kCGGradientDrawsBeforeStartLocation;
+    options |= kCGGradientDrawsAfterEndLocation;
+    
+    CGContextDrawLinearGradient(graphicsContext, myGradient, start, end, options);
+    
+    CGColorSpaceRelease(myColorspace);
+    CGGradientRelease(myGradient);
+}
+
+
+
+
+
+
+
+
+
+
 - (void) drawDropShadowInContext:(CGContextRef) graphicsContext
                             rect:(CGRect) rect
                             path:(CGPathRef) myPath
@@ -236,7 +280,11 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 	
 	// DRAW A GRADIENT OF SOME SORT, CLIPPED TO THE ROUND RECT PATH
 	// THAT THE IMAGE WOULD BE CLIPPED TO
-	
+    [self drawGradientInContext:aGraphicsContext
+                           rect:self.bounds
+                           path:aPath];
+    
+    
 	
     CGContextSelectFont(aGraphicsContext, "Helvetica", 36.0, kCGEncodingMacRoman);
     
