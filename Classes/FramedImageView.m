@@ -14,7 +14,7 @@
 // Ref http://stackoverflow.com/questions/1052233/iphone-obj-c-anonymous-category-or-private-category
 @interface FramedImageView ()
 
-- (void) drawPlaceholderInContext:(CGContextRef) graphicsContext clippedToPath:(CGPathRef)aPath;
+- (void) drawPlaceholderInContext:(CGContextRef) aGraphicsContext clippedToPath:(CGPathRef)aPath;
 - (void) initialize;
 
 @end
@@ -183,46 +183,46 @@ void drawDropShadow(CGContextRef graphicsContext, CGRect rect, CGPathRef myPath,
 }
 
 
-- (void) drawImageinContext:(CGContextRef) graphicsContext
-                       rect:(CGRect) rect
-                      image:(CGImageRef) anImage
-              clippedToPath:(CGPathRef) aPath
+- (void) drawImage:(CGImageRef) anImage
+           context:(CGContextRef) aGraphicsContext
+              rect:(CGRect) aRect
+     clippedToPath:(CGPathRef) aPath
 {    
-    CGContextSaveGState(graphicsContext);
+    CGContextSaveGState(aGraphicsContext);
     
-    CGContextAddPath(graphicsContext, aPath);
-    CGContextClip(graphicsContext);
+    CGContextAddPath(aGraphicsContext, aPath);
+    CGContextClip(aGraphicsContext);
     
     // Here we get a CGImageRef from a Cocoa UIImage.
     // Alternatively, we could have gotten a CGImageRef from C.
     // http://developer.apple.com/iphone/library/documentation/Cocoa/Conceptual/LoadingResources/ImageSoundResources/ImageSoundResources.html
     // Ref Gelphman Ch 8 p 187, Ch 9 p 206-207   
-    CGContextDrawImage(graphicsContext, rect, anImage);
+    CGContextDrawImage(aGraphicsContext, aRect, anImage);
     
     // turn off clipping
-    CGContextRestoreGState(graphicsContext);
+    CGContextRestoreGState(aGraphicsContext);
 }
 
 
-- (void) drawBorderInContext:(CGContextRef) graphicsContext
-               clippedToPath:(CGPathRef)path
-                 borderWidth:(CGFloat) borderWidth
+- (void) drawBorderOfWidth:(CGFloat) aBorderWidth
+                 InContext:(CGContextRef) aGraphicsContext
+               clippedToPath:(CGPathRef)aPath
 {
-    CGContextSaveGState(graphicsContext);
+    CGContextSaveGState(aGraphicsContext);
     
-    CGContextBeginPath(graphicsContext);
-    CGContextAddPath(graphicsContext, path);
+    CGContextBeginPath(aGraphicsContext);
+    CGContextAddPath(aGraphicsContext, aPath);
     
-    CGContextSetLineWidth(graphicsContext, borderWidth);
-    CGContextSetRGBStrokeColor(graphicsContext, 1.0, 1.0, 1.0, 1.0);
+    CGContextSetLineWidth(aGraphicsContext, aBorderWidth);
+    CGContextSetRGBStrokeColor(aGraphicsContext, 1.0, 1.0, 1.0, 1.0);
     
-    CGContextDrawPath(graphicsContext, kCGPathStroke);
+    CGContextDrawPath(aGraphicsContext, kCGPathStroke);
     
-    CGContextRestoreGState(graphicsContext);
+    CGContextRestoreGState(aGraphicsContext);
 }
 
 
-- (void) drawPlaceholderInContext:(CGContextRef) graphicsContext
+- (void) drawPlaceholderInContext:(CGContextRef) aGraphicsContext
                     clippedToPath:(CGPathRef)aPath
 {
 	// if we don't have an image draw a simple little placeholder
@@ -235,7 +235,7 @@ void drawDropShadow(CGContextRef graphicsContext, CGRect rect, CGPathRef myPath,
 	// THAT THE IMAGE WOULD BE CLIPPED TO
 	
 	
-    CGContextSelectFont(graphicsContext, "Helvetica", 36.0, kCGEncodingMacRoman);
+    CGContextSelectFont(aGraphicsContext, "Helvetica", 36.0, kCGEncodingMacRoman);
     
     NSString*	placeholderString = @"Waiting for image from Service";
     
@@ -290,14 +290,14 @@ void drawDropShadow(CGContextRef graphicsContext, CGRect rect, CGPathRef myPath,
     {
         drawDropShadow(graphicsContext, [self bounds], myPath, self.borderWidth);
         
-        [self drawImageinContext:graphicsContext
-                            rect:[self bounds]
-                           image:[self.image CGImage]
-                   clippedToPath:myPath];
+        [self drawImage:[self.image CGImage]
+                context:graphicsContext
+                   rect:[self bounds]
+          clippedToPath:myPath];
         
-        [self drawBorderInContext:graphicsContext 
-                    clippedToPath:myPath 
-                      borderWidth:self.borderWidth];
+        [self drawBorderOfWidth:self.borderWidth
+                      InContext:graphicsContext 
+                    clippedToPath:myPath];
         
         //		[image_ drawInRect:imageBounds];
     }
