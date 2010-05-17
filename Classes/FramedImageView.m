@@ -259,6 +259,10 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
                          withFont:textFont
                     lineBreakMode:UILineBreakModeWordWrap
                         alignment:UITextAlignmentCenter];
+    
+    [self drawBorderOfWidth:self.borderWidth
+                  InContext:aGraphicsContext 
+              clippedToPath:aPath];    
 }
 
 
