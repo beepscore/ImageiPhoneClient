@@ -157,8 +157,11 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 }
 
 
-void drawDropShadow(CGContextRef graphicsContext, CGRect rect, CGPathRef myPath, CGFloat aBorderWidth) {
-    
+- (void) drawDropShadowInContext:(CGContextRef) graphicsContext
+                            rect:(CGRect) rect
+                            path:(CGPathRef) myPath
+                     borderWidth:(CGFloat) aBorderWidth
+{
     CGContextSaveGState(graphicsContext);
     CGFloat xScale = (rect.size.width + aBorderWidth)/rect.size.width;
     CGFloat yScale = (rect.size.height + aBorderWidth)/rect.size.height;
@@ -206,7 +209,7 @@ void drawDropShadow(CGContextRef graphicsContext, CGRect rect, CGPathRef myPath,
 
 - (void) drawBorderOfWidth:(CGFloat) aBorderWidth
                  InContext:(CGContextRef) aGraphicsContext
-               clippedToPath:(CGPathRef)aPath
+             clippedToPath:(CGPathRef)aPath
 {
     CGContextSaveGState(aGraphicsContext);
     
@@ -288,7 +291,12 @@ void drawDropShadow(CGContextRef graphicsContext, CGRect rect, CGPathRef myPath,
         
 	} else
     {
-        drawDropShadow(graphicsContext, [self bounds], myPath, self.borderWidth);
+        
+        [self drawDropShadowInContext:graphicsContext
+                                 rect:[self bounds]
+                                 path:myPath
+                          borderWidth:self.borderWidth];
+        
         
         [self drawImage:[self.image CGImage]
                 context:graphicsContext
@@ -297,7 +305,7 @@ void drawDropShadow(CGContextRef graphicsContext, CGRect rect, CGPathRef myPath,
         
         [self drawBorderOfWidth:self.borderWidth
                       InContext:graphicsContext 
-                    clippedToPath:myPath];
+                  clippedToPath:myPath];
         
         //		[image_ drawInRect:imageBounds];
     }
