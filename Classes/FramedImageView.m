@@ -35,7 +35,7 @@
     return self;
 }
 
-
+// instantiating from a nib calls this.  Alternatively could use awakeFromNib to call [self initialize
 - (id)initWithCoder:(NSCoder *)aDecoder
 {
     if (( self = [super initWithCoder:aDecoder]))
@@ -225,7 +225,7 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 }
 
 
-- (void) drawImage:(CGImageRef) anImage
+- (void) drawImage:(UIImage*) anImage
            context:(CGContextRef) aGraphicsContext
               rect:(CGRect) aRect
      clippedToPath:(CGPathRef) aPath
@@ -235,15 +235,7 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     CGContextAddPath(aGraphicsContext, aPath);
     CGContextClip(aGraphicsContext);
     
-    // Here we get a CGImageRef from a Cocoa UIImage.
-    // Alternatively, we could have gotten a CGImageRef from C.
-    // http://developer.apple.com/iphone/library/documentation/Cocoa/Conceptual/LoadingResources/ImageSoundResources/ImageSoundResources.html
-    // Ref Gelphman Ch 8 p 187, Ch 9 p 206-207
-    // scale y axis by -1 to flip image upside down
-    CGContextScaleCTM(aGraphicsContext, 1.0f, -1.0f);
-    // translate image up
-    CGContextTranslateCTM(aGraphicsContext, 0.0f, -aRect.size.height);
-    CGContextDrawImage(aGraphicsContext, aRect, anImage);
+    [anImage drawInRect:aRect];
     
     // turn off clipping
     CGContextRestoreGState(aGraphicsContext);
@@ -296,9 +288,9 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     
     
 	// draw shadow on text
-    CGSize offset = CGSizeMake(5.0f, 5.0f);
-    CGFloat blur = 5.0f;
-    //CGContextSetShadowWithColor(aGraphicsContext, offset, blur, kCGColorBlack);
+    CGSize offset = CGSizeMake(3.0f, -4.0f);
+    CGFloat blur = 4.0f;
+    //CGContextSetShadowWithColor(aGraphicsContext, offset, blur, [[UIColor blackColor] CGColor]);
     CGContextSetShadow(aGraphicsContext, offset, blur);        
     
     [placeholderString drawInRect:textRect
@@ -344,8 +336,7 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
                                  path:myPath
                           borderWidth:self.borderWidth];
         
-        
-        [self drawImage:[self.image CGImage]
+        [self drawImage:self.image
                 context:graphicsContext
                    rect:[self bounds]
           clippedToPath:myPath];
@@ -353,8 +344,6 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
         [self drawBorderOfWidth:self.borderWidth
                       InContext:graphicsContext 
                   clippedToPath:myPath];
-        
-        //		[image_ drawInRect:imageBounds];
     }
 	
 	// FOLLOW UP WITH ANY OTHER AFTER IMAGE DRAWING AS BEFORE
