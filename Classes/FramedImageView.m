@@ -318,35 +318,43 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 
 - (void)drawRect:(CGRect)rect
 {    
-    
     // get graphics context from Cocoa for use by Quartz CoreGraphics.    
     CGContextRef graphicsContext = UIGraphicsGetCurrentContext();
-    // CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
-    CGRect clipRect = CGRectMake(20.0, 20.0, 280.0, 280.0);
+    
+    //CGRect clipRect = CGRectInset(self.bounds, 20.0, 20.0);    
     CGFloat ovalWidth = [self cornerRadius];
     CGFloat ovalHeight = ovalWidth;
-    
-    // Create a new CGMutablePathRef each time.  Chris thinks this is low overhead.
-    // Alternatively could make myPath a class ivar and change it's value.    
-    CGMutablePathRef myPath = roundedRectPathRef(clipRect, ovalWidth, ovalHeight);
-    
 
+    
 	// if we don't have an image, draw placeholder
 	if (nil == self.image)
 	{
+        CGRect clipRect = CGRectInset(self.bounds, 20.0, 20.0);    
+
+        // Create a new CGMutablePathRef each time.  Chris thinks this is low overhead.
+        // Alternatively could make myPath a class ivar and change it's value.    
+        CGMutablePathRef myPath = roundedRectPathRef(clipRect, ovalWidth, ovalHeight);
+
         [self drawPlaceholderInContext:graphicsContext
                          clippedToPath:myPath];
+                
+        CGPathRelease(myPath);
         
 	} else
     {
+        CGRect clipRect = CGRectInset(self.bounds, 20.0, 20.0);    
+
+        // Create a new CGMutablePathRef each time.  Chris thinks this is low overhead.
+        // Alternatively could make myPath a class ivar and change it's value.    
+        CGMutablePathRef myPath = roundedRectPathRef(clipRect, ovalWidth, ovalHeight);        
+
         [self drawImage:self.image
                 context:graphicsContext
                    rect:[self bounds]
           clippedToPath:myPath];
+        
+        CGPathRelease(myPath);
     }
-	
-	// FOLLOW UP WITH ANY OTHER AFTER IMAGE DRAWING AS BEFORE
-    CGPathRelease(myPath);	
 }
 
 
