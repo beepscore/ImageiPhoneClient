@@ -14,7 +14,9 @@
 // Ref http://stackoverflow.com/questions/1052233/iphone-obj-c-anonymous-category-or-private-category
 @interface FramedImageView ()
 
-- (void) drawPlaceholderInContext:(CGContextRef) aGraphicsContext clippedToPath:(CGPathRef)aPath;
+- (void) drawPlaceholderInContext:(CGContextRef) aGraphicsContext
+                             rect:(CGRect) aRect
+                    clippedToPath:(CGPathRef)aPath;
 - (void) initialize;
 
 @end
@@ -166,7 +168,6 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
                           rect:(CGRect) rect
                           path:(CGPathRef) myPath
 {
-    
     CGContextSaveGState(graphicsContext);
     CGContextAddPath(graphicsContext, myPath);
     CGContextClip(graphicsContext);
@@ -175,8 +176,8 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     CGColorSpaceRef myColorspace;    
     size_t num_locations = 2;    
     CGFloat locations[2] = { 0.0, 1.0 };    
-    CGFloat components[8] = { 1.0, 0.5, 0.4, 1.0,  // Start color
-        0.8, 0.8, 0.3, 1.0 }; // End color
+    CGFloat components[8] = { 0.4, 0.4, 0.8, 1.0,  // Start color
+        0.1, 0.1, 0.2, 1.0 }; // End color
     
     // ref http://stackoverflow.com/questions/560254/kcgcolorspacegenericrgb-is-deprecated-on-iphone
     myColorspace = CGColorSpaceCreateDeviceRGB();
@@ -246,34 +247,17 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 }
 
 
-- (void) drawImage:(UIImage*) anImage
-           context:(CGContextRef) aGraphicsContext
-              rect:(CGRect) aRect
-     clippedToPath:(CGPathRef) aPath
-{    
-    [self drawDropShadowInContext:aGraphicsContext
-                             rect:aRect
-                             path:aPath
-                      borderWidth:self.borderWidth]; 
-    
-    CGContextSaveGState(aGraphicsContext);    
-    CGContextAddPath(aGraphicsContext, aPath);
-    CGContextClip(aGraphicsContext);    
-    [anImage drawInRect:aRect];    
-    // turn off clipping
-    CGContextRestoreGState(aGraphicsContext);
-
-    [self drawBorderOfWidth:self.borderWidth
-                  InContext:aGraphicsContext 
-              clippedToPath:aPath];    
-}
-
-
 - (void) drawPlaceholderInContext:(CGContextRef) aGraphicsContext
+                             rect:(CGRect) aRect
                     clippedToPath:(CGPathRef)aPath
 {
 	// if we don't have an image draw a simple little placeholder
 		
+    [self drawDropShadowInContext:aGraphicsContext
+                             rect:aRect
+                             path:aPath
+                      borderWidth:self.borderWidth]; 
+
     CGContextSaveGState(aGraphicsContext);
 
 	// draw gradient clipped to path    
@@ -299,9 +283,10 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 	// draw shadow on text
     CGSize offset = CGSizeMake(3.0f, -4.0f);
     CGFloat blur = 4.0f;
-    //CGContextSetShadowWithColor(aGraphicsContext, offset, blur, [[UIColor blackColor] CGColor]);
-    CGContextSetShadow(aGraphicsContext, offset, blur);        
-    
+    CGContextSetShadowWithColor(aGraphicsContext, offset, blur, [[UIColor blackColor] CGColor]);
+    //CGContextSetShadow(aGraphicsContext, offset, blur);        
+    CGContextSetRGBFillColor(aGraphicsContext, 1.0, 1.0, 1.0, 1.0);
+
     [placeholderString drawInRect:textRect
                          withFont:textFont
                     lineBreakMode:UILineBreakModeWordWrap
@@ -309,6 +294,29 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 
     // restore context to "unset" shadow
     CGContextRestoreGState(aGraphicsContext);    
+    
+    [self drawBorderOfWidth:self.borderWidth
+                  InContext:aGraphicsContext 
+              clippedToPath:aPath];    
+}
+
+
+- (void) drawImage:(UIImage*) anImage
+           context:(CGContextRef) aGraphicsContext
+              rect:(CGRect) aRect
+     clippedToPath:(CGPathRef) aPath
+{    
+    [self drawDropShadowInContext:aGraphicsContext
+                             rect:aRect
+                             path:aPath
+                      borderWidth:self.borderWidth]; 
+    
+    CGContextSaveGState(aGraphicsContext);    
+    CGContextAddPath(aGraphicsContext, aPath);
+    CGContextClip(aGraphicsContext);    
+    [anImage drawInRect:aRect];    
+    // turn off clipping
+    CGContextRestoreGState(aGraphicsContext);
     
     [self drawBorderOfWidth:self.borderWidth
                   InContext:aGraphicsContext 
@@ -335,7 +343,8 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
         // Alternatively could make myPath a class ivar and change it's value.    
         CGMutablePathRef myPath = roundedRectPathRef(clipRect, ovalWidth, ovalHeight);
 
-        [self drawPlaceholderInContext:graphicsContext
+        [self drawPlaceholderInContext:graphicsContext 
+                                  rect:clipRect
                          clippedToPath:myPath];
                 
         CGPathRelease(myPath);
