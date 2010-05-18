@@ -171,7 +171,7 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     CGContextSaveGState(graphicsContext);
     CGContextAddPath(graphicsContext, myPath);
     CGContextClip(graphicsContext);
-
+    
     CGGradientRef myGradient;    
     CGColorSpaceRef myColorspace;    
     size_t num_locations = 2;    
@@ -252,19 +252,19 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
                     clippedToPath:(CGPathRef)aPath
 {
 	// if we don't have an image draw a simple little placeholder
-		
+    
     [self drawDropShadowInContext:aGraphicsContext
                              rect:aRect
                              path:aPath
                       borderWidth:self.borderWidth]; 
-
+    
     CGContextSaveGState(aGraphicsContext);
-
+    
 	// draw gradient clipped to path    
     [self drawGradientInContext:aGraphicsContext
                            rect:self.bounds
                            path:aPath];
-
+    
     // draw text informing the user why there is no image
     CGContextSelectFont(aGraphicsContext, "Helvetica", 36.0, kCGEncodingMacRoman);
     
@@ -286,12 +286,12 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     CGContextSetShadowWithColor(aGraphicsContext, offset, blur, [[UIColor blackColor] CGColor]);
     //CGContextSetShadow(aGraphicsContext, offset, blur);        
     CGContextSetRGBFillColor(aGraphicsContext, 1.0, 1.0, 1.0, 1.0);
-
+    
     [placeholderString drawInRect:textRect
                          withFont:textFont
                     lineBreakMode:UILineBreakModeWordWrap
                         alignment:UITextAlignmentCenter];
-
+    
     // restore context to "unset" shadow
     CGContextRestoreGState(aGraphicsContext);    
     
@@ -329,42 +329,60 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     // get graphics context from Cocoa for use by Quartz CoreGraphics.    
     CGContextRef graphicsContext = UIGraphicsGetCurrentContext();
     
-    //CGRect clipRect = CGRectInset(self.bounds, 20.0, 20.0);    
+    CGRect clipRect = CGRectInset(self.bounds, 20.0, 20.0);    
     CGFloat ovalWidth = [self cornerRadius];
     CGFloat ovalHeight = ovalWidth;
-
     
 	// if we don't have an image, draw placeholder
 	if (nil == self.image)
 	{
-        CGRect clipRect = CGRectInset(self.bounds, 20.0, 20.0);    
-
         // Create a new CGMutablePathRef each time.  Chris thinks this is low overhead.
         // Alternatively could make myPath a class ivar and change it's value.    
         CGMutablePathRef myPath = roundedRectPathRef(clipRect, ovalWidth, ovalHeight);
-
+        
         [self drawPlaceholderInContext:graphicsContext 
                                   rect:clipRect
                          clippedToPath:myPath];
-                
+        
         CGPathRelease(myPath);
         
-	} else
+	} else    
     {
-        CGRect clipRect = CGRectInset(self.bounds, 20.0, 20.0);    
+        // draw image
 
-        // Create a new CGMutablePathRef each time.  Chris thinks this is low overhead.
-        // Alternatively could make myPath a class ivar and change it's value.    
+        CGFloat imageAspectRatio = (self.image.size.width / self.image.size.height);
+        NSLog(@"imageAspectRatio = %f", imageAspectRatio);
+        CGFloat rectAspectRatio = (clipRect.size.width / clipRect.size.height);
+        NSLog(@"rectAspectRatio = %f", rectAspectRatio);
+        
+        // TODO: use CTM to scale?  scale based on self.bounds, not clipRect?
+        if (imageAspectRatio > rectAspectRatio) {
+            // image is "more" landscape than screen.  shrink screen rect height
+            CGFloat oldHeight = clipRect.size.height;
+            //CGFloat oldHeight = self.bounds.size.height;
+            clipRect.size.height =  (clipRect.size.width / imageAspectRatio);
+            //self.bounds = CGRectMake(0.0, 0.0, self.bounds.size.width, (self.bounds.size.width / imageAspectRatio));
+            clipRect.origin.y = ((oldHeight - clipRect.size.height) / (imageAspectRatio/rectAspectRatio));
+        }
+        else {
+            if (imageAspectRatio < rectAspectRatio) {
+                // image is "more" portrait than screen.  shrink screen rect width
+                CGFloat oldWidth = clipRect.size.width;
+                clipRect.size.width = (imageAspectRatio * clipRect.size.height);
+                //clipRect.origin.y = 0.0;
+                clipRect.origin.x =  ((rectAspectRatio/imageAspectRatio) * (oldWidth - clipRect.size.width));
+            }
+        }
+
         CGMutablePathRef myPath = roundedRectPathRef(clipRect, ovalWidth, ovalHeight);        
-
+        
         [self drawImage:self.image
                 context:graphicsContext
-                   rect:[self bounds]
+                   rect:clipRect
           clippedToPath:myPath];
-        
+                
         CGPathRelease(myPath);
-    }
+    }    
 }
-
 
 @end
