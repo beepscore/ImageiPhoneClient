@@ -26,6 +26,7 @@
 @synthesize borderWidth	= borderWidth_;
 @synthesize cornerRadius	= cornerRadius_;
 
+// instantiating programmatically calls initWithFrame:
 - (id)initWithFrame:(CGRect)frame
 {
     if ((self = [super initWithFrame:frame]))
@@ -35,7 +36,8 @@
     return self;
 }
 
-// instantiating from a nib calls this.  Alternatively could use awakeFromNib to call [self initialize
+// instantiating from a nib calls initWithCoder:
+// Alternatively could call [self initialize] in awakeFromNib.
 - (id)initWithCoder:(NSCoder *)aDecoder
 {
     if (( self = [super initWithCoder:aDecoder]))
@@ -44,6 +46,7 @@
     }
     return self;
 }
+
 
 - (void) initialize
 {
@@ -225,23 +228,6 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 }
 
 
-- (void) drawImage:(UIImage*) anImage
-           context:(CGContextRef) aGraphicsContext
-              rect:(CGRect) aRect
-     clippedToPath:(CGPathRef) aPath
-{    
-    CGContextSaveGState(aGraphicsContext);
-    
-    CGContextAddPath(aGraphicsContext, aPath);
-    CGContextClip(aGraphicsContext);
-    
-    [anImage drawInRect:aRect];
-    
-    // turn off clipping
-    CGContextRestoreGState(aGraphicsContext);
-}
-
-
 - (void) drawBorderOfWidth:(CGFloat) aBorderWidth
                  InContext:(CGContextRef) aGraphicsContext
              clippedToPath:(CGPathRef)aPath
@@ -257,6 +243,29 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     CGContextDrawPath(aGraphicsContext, kCGPathStroke);
     
     CGContextRestoreGState(aGraphicsContext);
+}
+
+
+- (void) drawImage:(UIImage*) anImage
+           context:(CGContextRef) aGraphicsContext
+              rect:(CGRect) aRect
+     clippedToPath:(CGPathRef) aPath
+{    
+    [self drawDropShadowInContext:aGraphicsContext
+                             rect:aRect
+                             path:aPath
+                      borderWidth:self.borderWidth]; 
+    
+    CGContextSaveGState(aGraphicsContext);    
+    CGContextAddPath(aGraphicsContext, aPath);
+    CGContextClip(aGraphicsContext);    
+    [anImage drawInRect:aRect];    
+    // turn off clipping
+    CGContextRestoreGState(aGraphicsContext);
+
+    [self drawBorderOfWidth:self.borderWidth
+                  InContext:aGraphicsContext 
+              clippedToPath:aPath];    
 }
 
 
@@ -330,20 +339,10 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
         
 	} else
     {
-        
-        [self drawDropShadowInContext:graphicsContext
-                                 rect:[self bounds]
-                                 path:myPath
-                          borderWidth:self.borderWidth];
-        
         [self drawImage:self.image
                 context:graphicsContext
                    rect:[self bounds]
           clippedToPath:myPath];
-        
-        [self drawBorderOfWidth:self.borderWidth
-                      InContext:graphicsContext 
-                  clippedToPath:myPath];
     }
 	
 	// FOLLOW UP WITH ANY OTHER AFTER IMAGE DRAWING AS BEFORE
