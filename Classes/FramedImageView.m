@@ -273,11 +273,14 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 {
 	// if we don't have an image draw a simple little placeholder
 		
-	// draw gradient clipped to path
+    CGContextSaveGState(aGraphicsContext);
+
+	// draw gradient clipped to path    
     [self drawGradientInContext:aGraphicsContext
                            rect:self.bounds
                            path:aPath];
 
+    // draw text informing the user why there is no image
     CGContextSelectFont(aGraphicsContext, "Helvetica", 36.0, kCGEncodingMacRoman);
     
     NSString*	placeholderString = @"Waiting for image from Service";
@@ -292,13 +295,19 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     textRect = CGRectInset(textRect, textHInset * 2.0f, textVInset * 2.0f);
     
     
-	// DRAW SOME TEXT INFORMING THE USER WHY THERE IS NO IMAGE
-	// THIS TEXT MUST HAVE A SHADOW DRAW BY THE
-	// CGCONTEXT SHADOW API
+	// draw shadow on text
+    CGSize offset = CGSizeMake(5.0f, 5.0f);
+    CGFloat blur = 5.0f;
+    //CGContextSetShadowWithColor(aGraphicsContext, offset, blur, kCGColorBlack);
+    CGContextSetShadow(aGraphicsContext, offset, blur);        
+    
     [placeholderString drawInRect:textRect
                          withFont:textFont
                     lineBreakMode:UILineBreakModeWordWrap
                         alignment:UITextAlignmentCenter];
+
+    // restore context to "unset" shadow
+    CGContextRestoreGState(aGraphicsContext);    
     
     [self drawBorderOfWidth:self.borderWidth
                   InContext:aGraphicsContext 
