@@ -104,23 +104,18 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     
     CGMutablePathRef tempPath = CGPathCreateMutable(); 
     
-    CGRect offsetRect = rect;
-    NSUInteger kDrawingViewWidth = 320;
-    NSUInteger kDrawingViewHeight = 320;
     CGFloat fw, fh;
-    
-    offsetRect.origin.x = (kDrawingViewWidth - rect.size.width)/2;
-    offsetRect.origin.y = (kDrawingViewHeight - rect.size.height)/2;
     
     // if either ovalWidth or ovalHeight is 0, don't round corners
     if ((0 == ovalWidth) || (0 == ovalHeight)) {
         
-        CGPathAddRect(tempPath, NULL, offsetRect);
+        CGPathAddRect(tempPath, NULL, rect);
     } else {
         
         CGAffineTransform transformOrigin = 
-        CGAffineTransformTranslate(CGAffineTransformIdentity, offsetRect.origin.x, offsetRect.origin.y);
-        
+        //CGAffineTransformTranslate(CGAffineTransformIdentity, offsetRect.origin.x, offsetRect.origin.y);
+        CGAffineTransformTranslate(CGAffineTransformIdentity, rect.origin.x, rect.origin.y);
+
         // Non-uniform scale coordinate system by the oval width and height.
         // In scaled coordinates, each rounded corner is a circular arc of radius = 0.5
         CGAffineTransform transformScale = CGAffineTransformScale(transformOrigin, ovalWidth, ovalHeight);
@@ -329,7 +324,10 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     // get graphics context from Cocoa for use by Quartz CoreGraphics.    
     CGContextRef graphicsContext = UIGraphicsGetCurrentContext();
     
-    CGRect clipRect = CGRectInset(self.bounds, 20.0, 20.0);    
+    CGFloat dx = 20.0;
+    CGFloat dy = 20.0;
+    
+    CGRect clipRect = CGRectInset(self.bounds, dx, dy);    
     CGFloat ovalWidth = [self cornerRadius];
     CGFloat ovalHeight = ovalWidth;
     
@@ -352,25 +350,24 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 
         CGFloat imageAspectRatio = (self.image.size.width / self.image.size.height);
         NSLog(@"imageAspectRatio = %f", imageAspectRatio);
-        CGFloat rectAspectRatio = (clipRect.size.width / clipRect.size.height);
-        NSLog(@"rectAspectRatio = %f", rectAspectRatio);
+        CGFloat clipRectAspectRatio = (clipRect.size.width / clipRect.size.height);
+        NSLog(@"clipRectAspectRatio = %f", clipRectAspectRatio);
         
-        // TODO: use CTM to scale?  scale based on self.bounds, not clipRect?
-        if (imageAspectRatio > rectAspectRatio) {
+        // Alternatively, could non-uniform scale CTM.
+        // However then would have to avoid scaling corners and stroke widths.
+        if (imageAspectRatio > clipRectAspectRatio) {
             // image is "more" landscape than screen.  shrink screen rect height
             CGFloat oldHeight = clipRect.size.height;
-            //CGFloat oldHeight = self.bounds.size.height;
             clipRect.size.height =  (clipRect.size.width / imageAspectRatio);
-            //self.bounds = CGRectMake(0.0, 0.0, self.bounds.size.width, (self.bounds.size.width / imageAspectRatio));
-            clipRect.origin.y = ((oldHeight - clipRect.size.height) / (imageAspectRatio/rectAspectRatio));
+            //clipRect.origin.y = ((oldHeight - clipRect.size.height) / (imageAspectRatio/clipRectAspectRatio));
+            clipRect.origin.y = (clipRectAspectRatio * (oldHeight - clipRect.size.height));
         }
         else {
-            if (imageAspectRatio < rectAspectRatio) {
+            if (imageAspectRatio < clipRectAspectRatio) {
                 // image is "more" portrait than screen.  shrink screen rect width
                 CGFloat oldWidth = clipRect.size.width;
                 clipRect.size.width = (imageAspectRatio * clipRect.size.height);
-                //clipRect.origin.y = 0.0;
-                clipRect.origin.x =  ((rectAspectRatio/imageAspectRatio) * (oldWidth - clipRect.size.width));
+                clipRect.origin.x = ((oldWidth - clipRect.size.width)/clipRectAspectRatio);
             }
         }
 
