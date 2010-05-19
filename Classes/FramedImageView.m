@@ -115,7 +115,7 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
         CGAffineTransform transformOrigin = 
         //CGAffineTransformTranslate(CGAffineTransformIdentity, offsetRect.origin.x, offsetRect.origin.y);
         CGAffineTransformTranslate(CGAffineTransformIdentity, rect.origin.x, rect.origin.y);
-
+        
         // Non-uniform scale coordinate system by the oval width and height.
         // In scaled coordinates, each rounded corner is a circular arc of radius = 0.5
         CGAffineTransform transformScale = CGAffineTransformScale(transformOrigin, ovalWidth, ovalHeight);
@@ -178,8 +178,7 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     myColorspace = CGColorSpaceCreateDeviceRGB();
     myGradient = CGGradientCreateWithColorComponents (myColorspace, components,
                                                       locations, num_locations);
-    
-    
+        
     CGPoint start = CGPointMake(rect.origin.x, rect.origin.y + rect.size.height * 0.25);
     CGPoint end = CGPointMake(rect.origin.x, rect.origin.y + rect.size.height * 0.75);
     CGGradientDrawingOptions options = 0;
@@ -195,35 +194,7 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 }
 
 
-- (void) drawDropShadowInContext:(CGContextRef) graphicsContext
-                            rect:(CGRect) rect
-                            path:(CGPathRef) myPath
-                     borderWidth:(CGFloat) aBorderWidth
-{
-    CGContextSaveGState(graphicsContext);
-    CGFloat xScale = (rect.size.width + aBorderWidth)/rect.size.width;
-    CGFloat yScale = (rect.size.height + aBorderWidth)/rect.size.height;
-    
-    CGContextTranslateCTM(graphicsContext, rect.size.width/2, rect.size.height/2);
-    CGContextScaleCTM(graphicsContext, xScale, yScale);
-    CGContextTranslateCTM(graphicsContext, -rect.size.width/2, -rect.size.height/2);
-    // offset shadow
-    CGContextTranslateCTM(graphicsContext, 0.01 * rect.size.width, 0.02 * rect.size.height);
-    
-    CGContextAddPath(graphicsContext, myPath);
-    
-    
-    CGContextSetRGBFillColor(graphicsContext, 0.0, 0.0, 0.0, 0.4);
-    CGContextFillPath(graphicsContext);
-    
-    // increase DropShadow size based on border width  ref Gelphman p 138
-    CGContextReplacePathWithStrokedPath (graphicsContext);
-    CGContextFillPath(graphicsContext);
-    
-    CGContextRestoreGState(graphicsContext);
-}
-
-
+// draw border with shadow
 - (void) drawBorderOfWidth:(CGFloat) aBorderWidth
                  InContext:(CGContextRef) aGraphicsContext
              clippedToPath:(CGPathRef)aPath
@@ -236,8 +207,15 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     CGContextSetLineWidth(aGraphicsContext, aBorderWidth);
     CGContextSetRGBStrokeColor(aGraphicsContext, 1.0, 1.0, 1.0, 1.0);
     
+    // turn shadow on
+    CGSize offset = CGSizeMake(3.0f, -4.0f);
+    CGFloat blur = 6.0f;
+    CGContextSetShadowWithColor(aGraphicsContext, offset, blur, [[UIColor blackColor] CGColor]);
+    
+    // draw path with shadow
     CGContextDrawPath(aGraphicsContext, kCGPathStroke);
     
+    // restore state including turn shadow off
     CGContextRestoreGState(aGraphicsContext);
 }
 
@@ -248,17 +226,19 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 {
 	// if we don't have an image draw a simple little placeholder
     
-    [self drawDropShadowInContext:aGraphicsContext
-                             rect:aRect
-                             path:aPath
-                      borderWidth:self.borderWidth]; 
-    
     CGContextSaveGState(aGraphicsContext);
     
-	// draw gradient clipped to path    
+    // draw border with shadow
+    [self drawBorderOfWidth:self.borderWidth
+                  InContext:aGraphicsContext 
+              clippedToPath:aPath];    
+    
+	// draw gradient clipped to path.
+    // This draws over part of border and shadow    
     [self drawGradientInContext:aGraphicsContext
                            rect:self.bounds
                            path:aPath];
+    
     
     // draw text informing the user why there is no image
     CGContextSelectFont(aGraphicsContext, "Helvetica", 36.0, kCGEncodingMacRoman);
@@ -275,24 +255,19 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
     textRect = CGRectInset(textRect, textHInset * 2.0f, textVInset * 2.0f);
     
     
-	// draw shadow on text
+	// turn on shadow for text
     CGSize offset = CGSizeMake(3.0f, -4.0f);
     CGFloat blur = 4.0f;
     CGContextSetShadowWithColor(aGraphicsContext, offset, blur, [[UIColor blackColor] CGColor]);
-    //CGContextSetShadow(aGraphicsContext, offset, blur);        
-    CGContextSetRGBFillColor(aGraphicsContext, 1.0, 1.0, 1.0, 1.0);
     
+    CGContextSetRGBFillColor(aGraphicsContext, 1.0, 1.0, 1.0, 1.0);    
     [placeholderString drawInRect:textRect
                          withFont:textFont
                     lineBreakMode:UILineBreakModeWordWrap
                         alignment:UITextAlignmentCenter];
     
-    // restore context to "unset" shadow
+    // restore context including turn shadow off
     CGContextRestoreGState(aGraphicsContext);    
-    
-    [self drawBorderOfWidth:self.borderWidth
-                  InContext:aGraphicsContext 
-              clippedToPath:aPath];    
 }
 
 
@@ -301,21 +276,21 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
               rect:(CGRect) aRect
      clippedToPath:(CGPathRef) aPath
 {    
-    [self drawDropShadowInContext:aGraphicsContext
-                             rect:aRect
-                             path:aPath
-                      borderWidth:self.borderWidth]; 
-    
     CGContextSaveGState(aGraphicsContext);    
-    CGContextAddPath(aGraphicsContext, aPath);
-    CGContextClip(aGraphicsContext);    
-    [anImage drawInRect:aRect];    
-    // turn off clipping
-    CGContextRestoreGState(aGraphicsContext);
     
     [self drawBorderOfWidth:self.borderWidth
                   InContext:aGraphicsContext 
               clippedToPath:aPath];    
+    
+    CGContextAddPath(aGraphicsContext, aPath);
+
+    // draw image
+    // This draws over part of border and shadow, keeps most of image visible   
+    CGContextClip(aGraphicsContext);    
+    [anImage drawInRect:aRect];
+
+    // restore context including turn clipping off
+    CGContextRestoreGState(aGraphicsContext);
 }
 
 
@@ -347,14 +322,16 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
 	} else    
     {
         // draw image
+        
+        // resize clipRect to preserve image aspect ratio
+        // Alternatively, could non-uniform scale CTM.
+        // However then would have to avoid scaling corners and stroke widths.
 
         CGFloat imageAspectRatio = (self.image.size.width / self.image.size.height);
         NSLog(@"imageAspectRatio = %f", imageAspectRatio);
         CGFloat clipRectAspectRatio = (clipRect.size.width / clipRect.size.height);
         NSLog(@"clipRectAspectRatio = %f", clipRectAspectRatio);
         
-        // Alternatively, could non-uniform scale CTM.
-        // However then would have to avoid scaling corners and stroke widths.
         if (imageAspectRatio > clipRectAspectRatio) {
             // image is "more" landscape than screen.  shrink screen rect height
             CGFloat oldHeight = clipRect.size.height;
@@ -370,14 +347,14 @@ CGMutablePathRef roundedRectPathRef(CGRect rect, CGFloat ovalWidth, CGFloat oval
                 clipRect.origin.x = ((oldWidth - clipRect.size.width)/clipRectAspectRatio);
             }
         }
-
+        
         CGMutablePathRef myPath = roundedRectPathRef(clipRect, ovalWidth, ovalHeight);        
         
         [self drawImage:self.image
                 context:graphicsContext
                    rect:clipRect
           clippedToPath:myPath];
-                
+        
         CGPathRelease(myPath);
     }    
 }
