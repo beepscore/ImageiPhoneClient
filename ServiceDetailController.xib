@@ -64,7 +64,7 @@
 						<int key="IBUIContentMode">7</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<string key="IBUIText">Width</string>
+						<string key="IBUIText">Border</string>
 						<object class="NSFont" key="IBUIFont" id="312686288">
 							<string key="NSName">Helvetica</string>
 							<double key="NSSize">18</double>
